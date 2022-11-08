@@ -14,6 +14,7 @@ export interface IAppContext {
     setMaxIterations?: (val) => void,
     setColor?: (index, val) => void,
     addColor?: () => void,
+    randomizeColors?: () => void,
 }
 
 const initialValue: IAppContext = {
@@ -37,7 +38,7 @@ const initialValue: IAppContext = {
 export const AppContext = createContext<IAppContext>(initialValue);
 
 const getRandomByte = () => Math.floor( Math.random() * 255);
-const getRandomColor = () => [getRandomByte(), getRandomByte(), getRandomByte()];
+const getRandomColor = () => (new Array(3).fill(0)).map( getRandomByte);
 
 export const AppContextProvider = (props) => {
     const [cJulia, setCJulia] = useState<[number, number]>(initialValue.cJulia);
@@ -68,6 +69,10 @@ export const AppContextProvider = (props) => {
         }
     }
 
+    const randomizeColors = () => {
+        setColors( (new Array(colors.length)).fill(0).map(getRandomColor) );
+    };
+
     
 
     const addColor = () => {
@@ -78,7 +83,7 @@ export const AppContextProvider = (props) => {
         cJulia, setCJulia,
         precision, setPrecision,
         maxIterations, setMaxIterations,
-        colors, setColor, addColor,
+        colors, setColor, addColor, randomizeColors,
         computedValues
     }}>
         {props.children}

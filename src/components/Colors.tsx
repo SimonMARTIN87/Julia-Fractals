@@ -15,6 +15,7 @@ export const Colors = () => {
             })
         }
         <button onClick={() => context.addColor()}>+</button>
+        <button onClick={() => context.randomizeColors()}>	&#9851;</button>
     </>
 
 }

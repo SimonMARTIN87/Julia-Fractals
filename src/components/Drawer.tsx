@@ -4,9 +4,14 @@ import { useAppContext } from "../context";
 export const Drawer = () => {
     const canvasRef = useRef<HTMLCanvasElement>();
     const [ctx, setCtx] = useState<CanvasRenderingContext2D>();
+
+    const [fakeCanvas, setFakeCanvas] = useState<HTMLCanvasElement>();
+    const [fakeCtx, setFakeCtx] = useState<CanvasRenderingContext2D>();
+    
     const context = useAppContext();
     const [scale, setScale] = useState<number>(1);
     const [pan, setPan] = useState<[number,number]>([0,0]);
+
 
     const clear = () => {
         if (canvasRef.current && ctx) {
@@ -42,14 +47,12 @@ export const Drawer = () => {
 
 
     const drawImageData = () => {       
-        if (canvasRef.current && ctx && context.computedValues?.length > 0) {
+        if (canvasRef.current && ctx && fakeCanvas && fakeCtx && context.computedValues?.length > 0) {
             console.time('draw');
             const len = context.computedValues.length; 
 
-            const fakeCanvas = document.createElement('canvas');
             fakeCanvas.width = len;
             fakeCanvas.height = len;
-            const fakeCtx = fakeCanvas.getContext('2d');
 
             const colors = context.colors;
             const seakLen = colors.length-1;
@@ -74,6 +77,16 @@ export const Drawer = () => {
     }
 
     useEffect( () => {
+        setFakeCanvas(document.createElement('canvas'));
+    }, []);
+
+    useEffect( () => {
+        if (fakeCanvas) {
+            setFakeCtx(fakeCanvas.getContext('2d'));
+        }
+    }, [fakeCanvas]);
+
+    useEffect( () => {
         if (canvasRef.current) {
             setCtx(canvasRef.current.getContext('2d'));
         }
@@ -82,7 +95,7 @@ export const Drawer = () => {
     useEffect( () => {
         clear();
         drawImageData();
-    }, [ctx, scale, pan, context.computedValues, context.colors]);
+    }, [ctx, scale, pan, context.computedValues, context.colors, fakeCtx]);
     
     return <>
     <canvas ref={canvasRef} width="600" height="600" onWheel={handleWheel} onMouseMove={handleMove} onDoubleClick={resetPanAndZoom}></canvas>

@@ -5,8 +5,6 @@ import { Colors } from "./Colors";
 import { Drawer } from "./Drawer";
 import { Menu } from "./Menu";
 
-const reactLogo = require("./../assets/img/react_logo.svg");
-
 const App = () => (
   <AppContextProvider>
     <div className="app">

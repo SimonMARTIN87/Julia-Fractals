@@ -1,14 +1,23 @@
 import * as React from "react";
+import { AppContextProvider } from "../context";
 import "./../assets/scss/App.scss";
+import { Colors } from "./Colors";
+import { Drawer } from "./Drawer";
+import { Menu } from "./Menu";
 
 const reactLogo = require("./../assets/img/react_logo.svg");
 
 const App = () => (
-  <div className="app">
-    <h1>Hello World!</h1>
-    <p>Foo to the barz</p>
-    <img src={reactLogo.default} height="480" />
-  </div>
+  <AppContextProvider>
+    <div className="app">
+      <p>
+        Warning, this can be heavy to compute. Avoid precision under 0.01 and iterations over 50 on small platforms.
+      </p>
+      <Drawer />
+      <Menu/>
+      <Colors/>
+    </div>
+  </AppContextProvider>
 );
 
 export default App;

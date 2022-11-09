@@ -1,5 +1,13 @@
 import { useAppContext } from "../context"
 
+const BEAUTYS = [
+    [.3,.5],
+    [.285,.01],
+    [-1.417022285618, 0.0099534],
+    [-.6,.6],
+    [-0.7806625878796623,-0.16673388946109258],
+    [-0.038088, .9754633]
+];
 
 export const Menu = () => {
     const context = useAppContext();
@@ -10,6 +18,15 @@ export const Menu = () => {
         } else {
             context.setAlgo('Mandelbrot');
         }
+    }
+
+    const random = () => {
+        context.setCJulia([Math.random()*2 - 1 , Math.random()*2 - 1 ]);
+    }
+
+    const beauty = () => {
+        const [a,b] = BEAUTYS[ Math.floor(Math.random()*BEAUTYS.length) ];
+        context.setCJulia([a,b]);
     }
 
     return <div className="menu">
@@ -54,6 +71,10 @@ export const Menu = () => {
                         name="Beta" 
                         step={0.001}
                         onChange={(e) => context.setCJulia([context.cJulia[0],parseFloat(e.target.value)]) }/>
+                </div>
+                <div className="form-group">
+                    <button onClick={random}>Random</button>
+                    <button onClick={beauty}>Beautiful</button>
                 </div>
             </>
         }

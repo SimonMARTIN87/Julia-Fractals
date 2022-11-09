@@ -1,11 +1,21 @@
 
-const module = ([x,y]) => Math.sqrt( x**2 + y**2);
+const moduleC = ([x,y]) => Math.sqrt( x**2 + y**2);
+
+
+export interface SpaceInterval {
+    xMin: number,
+    xMax: number, 
+    yMin: number, 
+    yMax: number,
+    xPoints: number,
+    yPoints: number
+};
 
 export const getJuliaConvergence = (c: [number, number], z0: [number, number], max_iterations) => {
     let zN: [number, number] = [...z0];
     let iteration = 0;
 
-    while(module(zN) < 2 && iteration < max_iterations) {
+    while(moduleC(zN) < 2 && iteration < max_iterations) {
         // Zn = Z(n-1) ^ 2 + c
         // (a+bi)(a+bi) + (a'+b'i)
         // a²+2abi-b² + a' + b'i

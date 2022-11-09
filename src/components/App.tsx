@@ -9,7 +9,7 @@ const App = () => (
   <AppContextProvider>
     <div className="app">
       <p>
-        Warning, this can be heavy to compute. Avoid precision under 0.01 and iterations over 50 on small platforms.
+        Warning, this can be heavy to compute. Avoid iterations over 50 on small platforms.
       </p>
       <Drawer />
       <Menu/>

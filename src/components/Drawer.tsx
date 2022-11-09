@@ -4,13 +4,27 @@ import { useAppContext } from "../context";
 export const Drawer = () => {
     const canvasRef = useRef<HTMLCanvasElement>();
     const [ctx, setCtx] = useState<CanvasRenderingContext2D>();
-
-    const [fakeCanvas, setFakeCanvas] = useState<HTMLCanvasElement>();
-    const [fakeCtx, setFakeCtx] = useState<CanvasRenderingContext2D>();
     
     const context = useAppContext();
-    const [scale, setScale] = useState<number>(1);
+    const [zoom, setZoom] = useState<number>(1.5);
     const [pan, setPan] = useState<[number,number]>([0,0]);
+
+    useEffect( () => {
+        if (canvasRef.current) {
+            const {width, height} = canvasRef.current;
+            const xUnit = width/4*zoom,
+                yUnit = height/4*zoom;
+            const xDiff = pan[0]/xUnit,
+                yDiff = pan[1]/yUnit;
+
+            let xMin = -2 / zoom - xDiff,
+                xMax = 2 / zoom - xDiff,
+                yMin = -2 / zoom + yDiff,
+                yMax = 2 / zoom + yDiff;
+
+            context.setInterval({xMin, xMax, yMax, yMin, xPoints: width, yPoints: height});
+        }
+    }, [zoom, pan]);
 
 
     const clear = () => {
@@ -20,19 +34,25 @@ export const Drawer = () => {
     }
 
     const handleWheel = (event) => {
-        const diff = event.deltaY > 0 ? -0.5 : 0.5;
-        setScale(Math.max(scale + diff, 0.5));
+        let nZ = Math.max(zoom*(event.deltaY > 0 ? .75 : 1.25) , 1);
+        if (nZ == 1) {
+            setPan([0,0]);
+        } else {
+            const ratio = (nZ/zoom);
+            setPan([pan[0]*ratio, pan[1]*ratio]);
+        }
+        setZoom(nZ);
     }
 
     const handleMove = (event) => {
-        if (event.buttons == '1') {
+        if (event.buttons == '1' && zoom != 1) {
             setPan([pan[0]+event.movementX, pan[1]+event.movementY]);
         }
         
     }
 
     const resetPanAndZoom = () => {
-        setScale(1);
+        setZoom(1);
         setPan([0,0]);
     }
 
@@ -47,12 +67,9 @@ export const Drawer = () => {
 
 
     const drawImageData = () => {       
-        if (canvasRef.current && ctx && fakeCanvas && fakeCtx && context.computedValues?.length > 0) {
-            console.time('draw');
+        if (canvasRef.current && ctx && context.computedValues?.length > 0) {
+            //console.time('draw');
             const len = context.computedValues.length; 
-
-            fakeCanvas.width = len;
-            fakeCanvas.height = len;
 
             const colors = context.colors;
             const seakLen = colors.length-1;
@@ -69,22 +86,38 @@ export const Drawer = () => {
                 })
             });
             const img = new ImageData(pixels, len, len, {colorSpace:"srgb"});
-            fakeCtx.putImageData(img,0,0);
-            const diff  = -((600*scale)-600)/2;
-            ctx.drawImage(fakeCanvas, 0,0,len,len,diff+pan[0],diff+pan[1],600*scale,600*scale);
-            console.timeEnd('draw')
+            ctx.putImageData(img,0,0);
+           // console.timeEnd('draw')
         }
     }
 
-    useEffect( () => {
-        setFakeCanvas(document.createElement('canvas'));
-    }, []);
+    const drawAxis = () => {
+        if (canvasRef.current && ctx) {
+            const {width, height} = canvasRef.current;
+            const [xC, yC] = [width/2+pan[0], height/2+pan[1]];
+            // TODO: apply pan
 
-    useEffect( () => {
-        if (fakeCanvas) {
-            setFakeCtx(fakeCanvas.getContext('2d'));
+            ctx.beginPath();
+            ctx.moveTo(0, yC);
+            ctx.lineTo(width,yC);
+            ctx.moveTo(xC, 0);
+            ctx.lineTo(xC, height);
+            ctx.stroke();
+
+            const xUnit = width/4*zoom,
+                  yUnit = height/4*zoom;
+
+            ctx.strokeText('-2', xC-2*xUnit, yC);
+            ctx.strokeText('-1', xC-xUnit, yC);
+            ctx.strokeText('1', xC+xUnit, yC);
+            ctx.strokeText('2', xC+2*xUnit, yC);
+
+            ctx.strokeText('2', xC, yC-2*yUnit);
+            ctx.strokeText('1', xC, yC-yUnit);
+            ctx.strokeText('-1', xC, yC+yUnit);
+            ctx.strokeText('-2', xC, yC+2*yUnit);
         }
-    }, [fakeCanvas]);
+    }
 
     useEffect( () => {
         if (canvasRef.current) {
@@ -94,11 +127,12 @@ export const Drawer = () => {
 
     useEffect( () => {
         clear();
+        drawAxis();
         drawImageData();
-    }, [ctx, scale, pan, context.computedValues, context.colors, fakeCtx]);
+    }, [ctx, zoom, pan, context.computedValues, context.colors]);
     
     return <>
-    <canvas ref={canvasRef} width="600" height="600" onWheel={handleWheel} onMouseMove={handleMove} onDoubleClick={resetPanAndZoom}></canvas>
+    <canvas ref={canvasRef} width="400" height="400" onWheel={handleWheel} onMouseMove={handleMove} onDoubleClick={resetPanAndZoom}></canvas>
     <button onClick={download} >Download</button>
     </>
 
